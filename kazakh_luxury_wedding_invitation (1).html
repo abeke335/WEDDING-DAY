@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="kk" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Әмірбек & Нұрайым — Тойға шақыру</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Cormorant Garamond (Luxury Serif) & Montserrat (Kazakh Cyrillic support) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            100: '#fdfbf2',
+                            200: '#f7edca',
+                            300: '#edd893',
+                            400: '#e1be57',
+                            500: '#d4af37',
+                            600: '#b89228',
+                            700: '#94721d',
+                            800: '#73561a',
+                        },
+                        cream: {
+                            50: '#fffdf9',
+                            100: '#fcf8f0',
+                            200: '#f6eedf',
+                            300: '#ede0ca',
+                        },
+                        bronze: '#2c2214',
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                        cursive: ['"Great Vibes"', 'cursive'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fcf8f0;
+            color: #2c2214;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Gold Foil Gradient Text */
+        .text-gold-gradient {
+            background: linear-gradient(135deg, #a88220 0%, #e6ca65 30%, #b89228 60%, #f7edca 85%, #8a6712 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Gold Shimmer Button */
+        .gold-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #f7edca 50%, #b89228 100%);
+            background-size: 200% 100%;
+            transition: all 0.4s ease;
+        }
+        .gold-btn:hover {
+            background-position: 100% 0;
+            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Kazakh Pattern SVG Background Overlay */
+        .kazakh-pattern-bg {
+            background-image: url('data:image/svg+xml;utf8,<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M40 0 C48 20, 60 32, 80 40 C60 48, 48 60, 40 80 C32 60, 20 48, 0 40 C20 32, 32 20, 40 0 Z" fill="%23d4af37" fill-opacity="0.03"/></svg>');
+        }
+
+        /* Wax Seal Shine Animation */
+        @keyframes sealGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.9)); transform: scale(1.03); }
+        }
+        .animate-seal-glow {
+            animation: sealGlow 3s ease-in-out infinite;
+        }
+
+        /* Pulse glow for highlight calendar day */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.7), inset 0 0 10px rgba(212, 175, 55, 0.5); transform: scale(1); }
+            50% { box-shadow: 0 0 25px rgba(212, 175, 55, 1), inset 0 0 15px rgba(212, 175, 55, 0.8); transform: scale(1.08); }
+        }
+        .gold-pulse-day {
+            animation: pulseGlow 2s infinite;
+        }
+
+        /* Scroll reveal class */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-on-scroll.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fcf8f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="kazakh-pattern-bg relative antialiased selection:bg-gold-500 selection:text-white">
+
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-20"></canvas>
+
+    <div class="fixed top-5 right-5 z-40">
+        <button id="musicToggleBtn" onclick="toggleAudio()" class="flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-full shadow-xl border border-gold-400/50 text-gold-700 hover:text-gold-600 transition-all transform hover:scale-105 active:scale-95 group">
+            <span class="relative flex h-2.5 w-2.5">
+              <span id="musicPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75 hidden"></span>
+              <span id="musicDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold-500"></span>
+            </span>
+            <i id="musicIcon" class="fa-solid fa-music text-sm"></i>
+            <span id="musicText" class="text-xs font-medium tracking-wider uppercase pr-1">♫ Музыканы қосу</span>
+        </button>
+    </div>
+
+    <!-- Hidden HTML5 Audio Element with workable fallback -->
+    <audio id="weddingAudio" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="envelopeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-bronze/95 backdrop-blur-md p-4 transition-opacity duration-1000">
+        <div id="envelopeCard" class="relative w-full max-w-md bg-cream-100 rounded-2xl p-8 border-2 border-gold-400/60 shadow-2xl text-center transform transition-all duration-700">
+            <!-- Kazakh Ornament Header Motif -->
+            <div class="flex justify-center mb-4">
+                <svg width="120" height="30" viewBox="0 0 120 30" fill="none" class="text-gold-500">
+                    <path d="M60 0 C70 15, 85 15, 95 5 C105 15, 120 15, 110 30 L10 30 C0 15, 15 15, 25 5 C35 15, 50 15, 60 0 Z" fill="currentColor" fill-opacity="0.15"/>
+                    <path d="M60 5 C65 15, 80 15, 90 8 M60 5 C55 15, 40 15, 30 8" stroke="currentColor" stroke-width="1.2"/>
+                    <circle cx="60" cy="5" r="2.5" fill="currentColor"/>
+                </svg>
+            </div>
+
+            <p class="text-xs font-semibold tracking-widest uppercase text-gold-700 mb-2">Тойға шақырамыз</p>
+            
+            <h1 class="font-serif text-3xl md:text-4xl font-bold text-gold-gradient my-3">
+                АМІРБЕК & НҰРАЙЫМ
+            </h1>
+            
+            <p class="text-sm font-serif italic text-bronze/80 mb-6">5 ҚАРАША 2026 ЖЫЛ</p>
+
+            <!-- Wax Seal Button -->
+            <div class="my-6 flex justify-center">
+                <div id="waxSeal" onclick="openInvitation()" class="w-20 h-20 bg-gradient-to-br from-gold-400 via-gold-500 to-gold-700 rounded-full flex items-center justify-center cursor-pointer shadow-xl border-2 border-gold-200 animate-seal-glow group transition-transform active:scale-90">
+                    <div class="w-16 h-16 rounded-full border border-gold-200/50 flex items-center justify-center text-white font-serif font-bold text-lg">
+                        Ә & Н
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="openInvitation()" class="gold-btn w-full py-3.5 rounded-full text-bronze font-bold text-xs uppercase tracking-widest shadow-lg mt-2 flex items-center justify-center gap-2">
+                <span>Шақыруды ашу</span>
+                <i class="fa-solid fa-heart text-red-700 text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="mainContent" class="max-w-md md:max-w-xl lg:max-w-2xl mx-auto bg-cream-50 min-h-screen shadow-2xl relative overflow-hidden border-x border-gold-300/30">
+
+        <section class="relative min-h-screen flex flex-col items-center justify-between p-6 text-center overflow-hidden">
+            <!-- Background Image with Overlay -->
+            <div class="absolute inset-0 z-0">
+                <img id="heroImg" src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop" 
+                     alt="Әмірбек & Нұрайым" 
+                     class="w-full h-full object-cover object-center filter brightness-90 saturate-90 scale-105 transition-transform duration-10000"
+                     onerror="this.src='https://placehold.co/800x1200/f6eedf/94721d?text=Әмірбек+%26+Нұрайым'">
+                <div class="absolute inset-0 bg-gradient-to-b from-bronze/70 via-bronze/40 to-cream-50"></div>
+            </div>
+
+            <!-- Top Kazakh National Ornament Header SVG -->
+            <div class="relative z-10 w-full pt-10 flex justify-center opacity-90 reveal-on-scroll">
+                <svg width="220" height="50" viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gold-300 drop-shadow-md">
+                    <path d="M100 5 C110 20, 130 20, 140 10 C150 0, 170 10, 160 25 C150 40, 120 25, 100 35 C80 25, 50 40, 40 25 C30 10, 50 0, 60 10 C70 20, 90 20, 100 5 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <circle cx="100" cy="5" r="3" fill="currentColor"/>
+                    <path d="M10 20 L40 20 M160 20 L190 20" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2"/>
+                </svg>
+            </div>
+
+            <!-- Main Invitation Banner Text -->
+            <div class="relative z-10 my-auto py-12 flex flex-col items-center space-y-5 reveal-on-scroll">
+                <p class="text-cream-100 text-xs md:text-sm tracking-widest uppercase font-medium bg-bronze/30 px-5 py-1.5 rounded-full border border-gold-300/40 backdrop-blur-sm">
+                    Тойымыздың қадірлі қонағы болыңыз!
+                </p>
+
+                <!-- Couple Names -->
+                <div class="space-y-1">
+                    <h1 class="font-serif text-5xl md:text-6xl text-white font-bold tracking-wide drop-shadow-lg leading-tight uppercase">
+                        АМІРБЕК
+                    </h1>
+                    <div class="flex items-center justify-center gap-4 my-2">
+                        <span class="h-[1px] w-12 bg-gradient-to-r from-transparent to-gold-300"></span>
+                        <span class="font-cursive text-4xl text-gold-300 drop-shadow">&</span>
+                        <span class="h-[1px] w-12 bg-gradient-to-l from-transparent to-gold-300"></span>
+                    </div>
+                    <h1 class="font-serif text-5xl md:text-6xl text-white font-bold tracking-wide drop-shadow-lg leading-tight uppercase">
+                        НҰРАЙЫМ
+                    </h1>
+                </div>
+
+                <!-- Event Date Highlight -->
+                <div class="pt-4">
+                    <p class="text-gold-200 font-serif italic text-xl md:text-2xl drop-shadow tracking-widest">
+                        5 ҚАРАША 2026
+                    </p>
+                </div>
+            </div>
+
+            <!-- Scroll Down Indicator Button -->
+            <div class="relative z-10 pb-6 animate-bounce">
+                <a href="#invitation-message" class="text-cream-200 hover:text-white transition-colors flex flex-col items-center gap-1 text-xs tracking-widest uppercase">
+                    <span>Төменге сырғытыңыз</span>
+                    <i class="fa-solid fa-chevron-down text-gold-300 text-base"></i>
+                </a>
+            </div>
+        </section>
+
+        <section id="invitation-message" class="px-6 py-16 text-center relative bg-cream-100 reveal-on-scroll">
+            <div class="max-w-md mx-auto border-2 border-gold-300/40 p-8 rounded-3xl bg-cream-50/80 shadow-sm relative">
+                <!-- Top Ornament Motif -->
+                <div class="flex justify-center mb-6">
+                    <svg width="100" height="24" viewBox="0 0 100 24" fill="none" class="text-gold-500">
+                        <path d="M50 0 C60 12, 75 12, 85 4 C95 12, 100 12, 90 24 L10 24 C0 12, 5 12, 15 4 C25 12, 40 12, 50 0 Z" fill="currentColor" fill-opacity="0.15"/>
+                        <circle cx="50" cy="4" r="2" fill="currentColor"/>
+                    </svg>
+                </div>
+
+                <h2 class="font-serif text-2xl md:text-3xl font-bold text-gold-700 mb-6 uppercase tracking-wider">
+                    Құрметті ағайын-туыс,<br>дос-жаран!
+                </h2>
+
+                <p class="text-bronze/90 leading-relaxed text-base font-light mb-6">
+                    Сіздерді өміріміздегі ең ерекше күніміздің қуанышын бірге бөлісуге, ақ дастарханымыздың қадірлі қонағы болуға шақырамыз!
+                </p>
+
+                <div class="my-6 py-4 border-y border-gold-300/40 inline-block px-8">
+                    <span id="coupleMonogram" class="font-serif text-2xl text-gold-600 font-bold tracking-widest">
+                        Әмірбек & Нұрайым
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 py-16 bg-white text-center relative border-t border-gold-200/50 reveal-on-scroll">
+            <p class="text-xs font-semibold uppercase tracking-widest text-gold-700 mb-2">Естелік сәттер</p>
+            <h3 class="font-serif text-2xl md:text-3xl font-bold text-bronze uppercase tracking-wide mb-8">
+                Біздің қуанышымызды бірге бөлісіңіздер
+            </h3>
+
+            <!-- 3 Photo Grid -->
+            <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                <!-- Large Main Photo -->
+                <div class="col-span-2 overflow-hidden rounded-2xl border-2 border-gold-300 shadow-md group">
+                    <img id="coupleImg1" src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1000&auto=format&fit=crop" 
+                         alt="Әмірбек & Нұрайым" 
+                         class="w-full h-64 object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                         onerror="this.src='https://placehold.co/800x600/f6eedf/94721d?text=Жас+жұбайлар'">
+                </div>
+                <!-- Flanking Photo 1 -->
+                <div class="overflow-hidden rounded-2xl border-2 border-gold-300 shadow-md group">
+                    <img id="coupleImg2" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop" 
+                         alt="Махаббат" 
+                         class="w-full h-40 object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                         onerror="this.src='https://placehold.co/600x400/f6eedf/94721d?text=Фото+1'">
+                </div>
+                <!-- Flanking Photo 2 -->
+                <div class="overflow-hidden rounded-2xl border-2 border-gold-300 shadow-md group">
+                    <img id="coupleImg3" src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=800&auto=format&fit=crop" 
+                         alt="Той салтанаты" 
+                         class="w-full h-40 object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                         onerror="this.src='https://placehold.co/600x400/f6eedf/94721d?text=Фото+2'">
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 py-16 bg-cream-100 text-center relative border-t border-gold-200/50 reveal-on-scroll">
+            <div class="max-w-md mx-auto">
+                <p class="text-xs font-semibold uppercase tracking-widest text-gold-700 mb-1">Той күні</p>
+                <h3 class="font-serif text-3xl font-bold text-bronze uppercase tracking-wide mb-1">
+                    5 ҚАРАША 2026 ЖЫЛ
+                </h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-8">Күнтізбеге сақтап қойыңыз</p>
+
+                <!-- REAL NOVEMBER 2026 CALENDAR GRID -->
+                <div class="bg-white p-6 rounded-3xl border border-gold-300/50 shadow-md">
+                    <!-- Calendar Weekday Headers (Mon-Sun) -->
+                    <div class="grid grid-cols-7 gap-1 mb-3 text-xs font-bold text-gold-700 border-b border-gold-100 pb-2">
+                        <div>Дүй</div>
+                        <div>Сей</div>
+                        <div>Сәр</div>
+                        <div>Бей</div>
+                        <div>Жұм</div>
+                        <div>Сен</div>
+                        <div>Жек</div>
+                    </div>
+
+                    <!-- November 2026 Days Matrix: Nov 1, 2026 is Sunday (7th column) -->
+                    <div class="grid grid-cols-7 gap-1 text-sm font-medium text-bronze">
+                        <!-- Empty slots for Nov 1 starting on Sunday (6 empty slots Mon-Sat) -->
+                        <div class="py-2.5"></div>
+                        <div class="py-2.5"></div>
+                        <div class="py-2.5"></div>
+                        <div class="py-2.5"></div>
+                        <div class="py-2.5"></div>
+                        <div class="py-2.5"></div>
+                        <!-- Day 1 -->
+                        <div class="py-2.5 flex items-center justify-center text-gray-400">1</div>
+
+                        <!-- Days 2 to 4 -->
+                        <div class="py-2.5 flex items-center justify-center">2</div>
+                        <div class="py-2.5 flex items-center justify-center">3</div>
+                        <div class="py-2.5 flex items-center justify-center">4</div>
+
+                        <!-- HIGHLIGHTED DAY 5 (Thursday) -->
+                        <div class="relative py-2.5 flex items-center justify-center font-bold z-10">
+                            <div class="absolute inset-0 bg-gold-500 rounded-full gold-pulse-day flex items-center justify-center"></div>
+                            <span class="relative z-10 text-white font-bold text-base">5</span>
+                            <i class="fa-solid fa-heart absolute -top-1.5 -right-1 text-gold-600 text-[10px] bg-white rounded-full p-0.5 shadow"></i>
+                        </div>
+
+                        <!-- Days 6 to 30 -->
+                        <div class="py-2.5 flex items-center justify-center">6</div>
+                        <div class="py-2.5 flex items-center justify-center">7</div>
+                        <div class="py-2.5 flex items-center justify-center">8</div>
+                        <div class="py-2.5 flex items-center justify-center">9</div>
+                        <div class="py-2.5 flex items-center justify-center">10</div>
+                        <div class="py-2.5 flex items-center justify-center">11</div>
+                        <div class="py-2.5 flex items-center justify-center">12</div>
+                        <div class="py-2.5 flex items-center justify-center">13</div>
+                        <div class="py-2.5 flex items-center justify-center">14</div>
+                        <div class="py-2.5 flex items-center justify-center">15</div>
+                        <div class="py-2.5 flex items-center justify-center">16</div>
+                        <div class="py-2.5 flex items-center justify-center">17</div>
+                        <div class="py-2.5 flex items-center justify-center">18</div>
+                        <div class="py-2.5 flex items-center justify-center">19</div>
+                        <div class="py-2.5 flex items-center justify-center">20</div>
+                        <div class="py-2.5 flex items-center justify-center">21</div>
+                        <div class="py-2.5 flex items-center justify-center">22</div>
+                        <div class="py-2.5 flex items-center justify-center">23</div>
+                        <div class="py-2.5 flex items-center justify-center">24</div>
+                        <div class="py-2.5 flex items-center justify-center">25</div>
+                        <div class="py-2.5 flex items-center justify-center">26</div>
+                        <div class="py-2.5 flex items-center justify-center">27</div>
+                        <div class="py-2.5 flex items-center justify-center">28</div>
+                        <div class="py-2.5 flex items-center justify-center">29</div>
+                        <div class="py-2.5 flex items-center justify-center">30</div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gold-800 font-medium italic mt-6">
+                    Осы ерекше күнде сіздерді асыға күтеміз!
+                </p>
+            </div>
+        </section>
+
+        <section class="px-6 py-14 bg-white text-center relative border-t border-gold-200/50 reveal-on-scroll">
+            <h3 class="font-serif text-xl font-bold uppercase tracking-widest text-gold-700 mb-6">
+                ТОЙҒА ДЕЙІН
+            </h3>
+
+            <div class="grid grid-cols-4 gap-2 md:gap-4 max-w-sm mx-auto">
+                <div class="bg-cream-100 p-3 rounded-2xl border border-gold-300/50 shadow-sm">
+                    <span id="days" class="block font-serif text-2xl md:text-3xl font-bold text-gold-600">00</span>
+                    <span class="text-[10px] text-gray-500 uppercase font-semibold">Күн</span>
+                </div>
+                <div class="bg-cream-100 p-3 rounded-2xl border border-gold-300/50 shadow-sm">
+                    <span id="hours" class="block font-serif text-2xl md:text-3xl font-bold text-gold-600">00</span>
+                    <span class="text-[10px] text-gray-500 uppercase font-semibold">Сағат</span>
+                </div>
+                <div class="bg-cream-100 p-3 rounded-2xl border border-gold-300/50 shadow-sm">
+                    <span id="minutes" class="block font-serif text-2xl md:text-3xl font-bold text-gold-600">00</span>
+                    <span class="text-[10px] text-gray-500 uppercase font-semibold">Минут</span>
+                </div>
+                <div class="bg-cream-100 p-3 rounded-2xl border border-gold-300/50 shadow-sm">
+                    <span id="seconds" class="block font-serif text-2xl md:text-3xl font-bold text-gold-600">00</span>
+                    <span class="text-[10px] text-gray-500 uppercase font-semibold">Секунд</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 py-16 bg-cream-100 text-center relative border-t border-gold-200/50 reveal-on-scroll">
+            <div class="max-w-md mx-auto space-y-6">
+                <p class="text-xs font-semibold uppercase tracking-widest text-gold-700">Мекенжайымыз</p>
+                <h3 class="font-serif text-2xl font-bold text-bronze uppercase tracking-wide">
+                    ТОЙХАНА
+                </h3>
+
+                <div class="bg-white p-8 rounded-3xl shadow-lg border border-gold-300/50 relative overflow-hidden">
+                    <p class="text-gold-700 font-serif text-3xl font-bold my-2" id="displayVenue">
+                        «ROYAL ROSE»
+                    </p>
+                    <p class="text-gray-600 text-sm mb-6">
+                        Сағат 18:00 басталады
+                    </p>
+
+                    <!-- Venue Photo Placeholder -->
+                    <div class="rounded-2xl overflow-hidden border border-gold-200 mb-6 shadow-inner">
+                        <img id="venueImg" src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000&auto=format&fit=crop" 
+                             alt="ROYAL ROSE Тойханасы" 
+                             class="w-full h-48 object-cover object-center"
+                             onerror="this.src='https://placehold.co/800x400/f6eedf/94721d?text=ROYAL+ROSE'">
+                    </div>
+
+                    <!-- Map Link Button -->
+                    <a id="mapBtn" href="https://2gis.kz" target="_blank" class="gold-btn inline-flex items-center justify-center gap-3 text-bronze font-bold px-8 py-3.5 rounded-full shadow-md w-full text-xs uppercase tracking-widest">
+                        <i class="fa-solid fa-map-location-dot text-base"></i>
+                        📍 КАРТАДАН КӨРУ
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 py-16 bg-white text-center relative border-t border-gold-200/50 reveal-on-scroll">
+            <div class="max-w-md mx-auto">
+                <h3 class="font-serif text-2xl md:text-3xl font-bold text-gold-700 uppercase tracking-wide mb-2">
+                    Қонақтардың келуін растауы
+                </h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-8">
+                    Өтініш, 25 қазанға дейін жауап беріңіз
+                </p>
+
+                <form id="rsvpForm" onsubmit="handleRSVP(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-bronze mb-1">Аты-жөніңіз:</label>
+                        <input type="text" id="guestName" required placeholder="Мысалы: Болат & Aйгүл" 
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gold-500 focus:ring-2 focus:ring-gold-200 outline-none transition-all text-sm bg-cream-50">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-bronze mb-1">Тойға қатысуыңыз:</label>
+                        <select id="attendance" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gold-500 focus:ring-2 focus:ring-gold-200 outline-none transition-all text-sm bg-cream-50">
+                            <option value="yes">Әрине, қуанышпен келемін!</option>
+                            <option value="couple">Жұбыммен / Отбасыммен келемін</option>
+                            <option value="no">Өкінішке орай, келе алмаймын</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-bronze mb-1">Жас жұбайларға тілегіңіз:</label>
+                        <textarea id="wishes" rows="3" placeholder="Ақ тілегіңізді жазыңыз..." 
+                                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-gold-500 focus:ring-2 focus:ring-gold-200 outline-none transition-all text-sm bg-cream-50"></textarea>
+                    </div>
+
+                    <button type="submit" class="gold-btn w-full py-4 rounded-xl text-bronze font-bold uppercase tracking-widest text-xs shadow-md mt-2">
+                        Растау / Жіберу
+                    </button>
+                </form>
+
+                <div id="rsvpThanks" class="hidden p-6 bg-cream-100 rounded-2xl border border-gold-300 text-gold-800 font-medium my-4 animate-fade-in">
+                    <i class="fa-solid fa-circle-check text-3xl text-gold-600 mb-2 block"></i>
+                    Рахмет! Жауабыңыз бен ақ тілегіңіз қабыл алынды.
+                </div>
+            </div>
+        </section>
+
+        <footer class="px-6 py-16 bg-cream-200 text-center relative border-t border-gold-300/40 reveal-on-scroll">
+            <p class="font-serif text-2xl text-gold-700 italic font-bold mb-4">
+                Сіздерді асыға күтеміз!
+            </p>
+
+            <!-- Pulsing Heart -->
+            <div class="my-4">
+                <i class="fa-solid fa-heart text-gold-500 text-3xl animate-pulse"></i>
+            </div>
+
+            <p id="footerNames" class="font-serif text-3xl text-bronze font-bold tracking-wide my-2">
+                Әмірбек & Нұрайым
+            </p>
+
+            <p class="text-xs text-gold-800 font-semibold uppercase tracking-widest my-3">
+                5 қараша 2026 • ROYAL ROSE
+            </p>
+
+            <p class="text-xs text-gray-600 mt-8">
+                Ізгі ниетпен, Әмірбек & Нұрайым ❤️
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // CONFIGURABLE CONSTANTS AT TOP OF JS
+        const COUPLE_NAMES = "Әмірбек & Нұрайым";
+        const WEDDING_DATE = "2026-11-05T18:00:00";
+        const VENUE_NAME = "ROYAL ROSE";
+        const MAP_URL = "https://2gis.kz";
+        const MUSIC_SRC = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
+
+        // AUDIO TOGGLE SYSTEM
+        const audioElement = document.getElementById('weddingAudio');
+        audioElement.src = MUSIC_SRC;
+        let isPlaying = false;
+
+        function toggleAudio() {
+            const musicText = document.getElementById('musicText');
+            const musicIcon = document.getElementById('musicIcon');
+            const musicPing = document.getElementById('musicPing');
+
+            if (!isPlaying) {
+                audioElement.play().then(() => {
+                    isPlaying = true;
+                    musicText.innerText = '♫ Музыканы өшіру';
+                    musicIcon.classList.add('animate-spin');
+                    musicPing.classList.remove('hidden');
+                }).catch(err => console.log("Audio play blocked by browser:", err));
+            } else {
+                audioElement.pause();
+                isPlaying = false;
+                musicText.innerText = '♫ Музыканы қосу';
+                musicIcon.classList.remove('animate-spin');
+                musicPing.classList.add('hidden');
+            }
+        }
+
+        // ENVELOPE OPENING ANIMATION
+        function openInvitation() {
+            const overlay = document.getElementById('envelopeOverlay');
+            const card = document.getElementById('envelopeCard');
+            
+            card.style.transform = 'scale(0.9) translateY(-30px)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1000);
+            }, 300);
+
+            // Attempt autoplay audio upon opening invitation
+            toggleAudio();
+        }
+
+        // LIVE COUNTDOWN TIMER
+        const targetTime = new Date(WEDDING_DATE).getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetTime - now;
+
+            if (diff > 0) {
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+                document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+                document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+                document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+            } else {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+            }
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // RSVP FORM SUBMISSION
+        function handleRSVP(e) {
+            e.preventDefault();
+            const name = document.getElementById('guestName').value;
+            if (name) {
+                document.getElementById('rsvpForm').classList.add('hidden');
+                document.getElementById('rsvpThanks').classList.remove('hidden');
+            }
+        }
+
+        // SCROLL REVEAL ANIMATIONS (IntersectionObserver)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+        // CANVAS GOLD PARTICLES ANIMATION
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height + canvas.height;
+                this.size = Math.random() * 2.5 + 1;
+                this.speedY = Math.random() * 0.7 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -10) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity})`;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = '#d4af37';
+                ctx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 30 }, () => new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
+</body>
+</html>
